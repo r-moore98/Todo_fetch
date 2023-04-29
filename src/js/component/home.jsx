@@ -1,26 +1,84 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-//include images into your bundle
-import rigoImage from "../../img/rigo-baby.jpg";
+const TodoItem = ({ item, removeItem }) => {
+  const [isHovering, setIsHovering] = useState(false);
 
-//create your first component
+  return (
+    <li
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {item.label}
+      {isHovering && <button onClick={() => removeItem(item)}>Remove</button>}
+    </li>
+  );
+};
+
 const Home = () => {
-	return (
-		<div className="text-center">
-			<h1 className="text-center mt-5">Hello Rigo!</h1>
-			<p>
-				<img src={rigoImage} />
-			</p>
-			<a href="#" className="btn btn-success">
-				If you see this green button... bootstrap is working...
-			</a>
-			<p>
-				Made by{" "}
-				<a href="http://www.4geeksacademy.com">4Geeks Academy</a>, with
-				love!
-			</p>
-		</div>
-	);
+  const [inputValue, setInputValue] = useState("");
+  const [todos, setTodos] = useState([]);
+
+  const apiUrl = "https://assets.breatheco.de/apis/fake/todos/user/r-moore98";
+
+  const updateApi = (arr) => {
+    axios.put(`${apiUrl}`, arr).then((response) => {
+      getTodo();
+    });
+  };
+
+  const getTodo = () => {
+    axios.get(`${apiUrl}`).then((response) => {
+      setTodos(response.data);
+      console.log(response.data);
+    });
+  };
+
+  useEffect(() => {
+    getTodo();
+  }, []);
+
+  const handleInputChange = (event) => {
+    setInputValue(event.target.value);
+  };
+
+  const handleAddTodo = (event) => {
+    event.preventDefault();
+    if (inputValue.trim() !== "") {
+      let newtodo = [
+        ...todos,
+        { label: inputValue.trim(), done: false },
+      ];
+	  updateApi(newtodo);
+      setInputValue("");
+    }
+  };
+
+  const handleRemoveTodo = (item) => {
+    let todolist = todos.filter((todo) => todo !== item);
+	updateApi(todolist);
+  };
+
+  return (
+    <div className="list">
+      <h1>todos</h1>
+      <form onSubmit={handleAddTodo}>
+        <input
+          type="text"
+          placeholder="What Needs To Be Done?"
+          value={inputValue}
+          onChange={handleInputChange}
+        />
+        <button type="submit">Add</button>
+      </form>
+
+      <ul>
+        {todos.map((todo, index) => (
+          <TodoItem key={index} item={todo} removeItem={handleRemoveTodo} />
+        ))}
+      </ul>
+    </div>
+  );
 };
 
 export default Home;

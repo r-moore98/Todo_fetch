@@ -1,4 +1,10 @@
-
+.list{
+    text-align: center
+  
+  }
+  ul{
+    list-style-type: none;
+  }
 /* 
 
     You can write your own styles here...
